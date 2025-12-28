@@ -141,10 +141,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let permItem = NSMenuItem(title: "Permission Required", action: #selector(grantPermission), keyEquivalent: "")
             permItem.target = self
             menu.addItem(permItem)
-
-            let checkAgainItem = NSMenuItem(title: "Check Permissions Again", action: #selector(checkPermissions), keyEquivalent: "")
-            checkAgainItem.target = self
-            menu.addItem(checkAgainItem)
         }
 
         menu.addItem(NSMenuItem.separator())
@@ -188,10 +184,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func grantPermission() {
         permissionManager.requestAuthorization()
-    }
-
-    @objc private func checkPermissions() {
-        permissionManager.forceCheck()
     }
 
     @objc private func viewHistory() {

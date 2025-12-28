@@ -9,7 +9,7 @@ DerivedData/
 .netrc
 
 # App bundle (built locally)
-TypingStats.app/Contents/MacOS/TypingStats
+*.app/Contents/MacOS/*
 
 # Release artifacts
 *.zip

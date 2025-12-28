@@ -1,0 +1,135 @@
+import SwiftUI
+
+struct SettingsView: View {
+    @ObservedObject var appSettings: AppSettings
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Settings")
+                .font(.title)
+                .fontWeight(.bold)
+                .padding(.bottom, 10)
+
+            VStack(alignment: .leading, spacing: 20) {
+                // Status Bar Display
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Menu Bar Display")
+                        .font(.headline)
+                    Text("What to show in the menu bar icon")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Picker("Display", selection: $appSettings.statusDisplay) {
+                        ForEach(StatusDisplay.allCases, id: \.self) { display in
+                            Text(display.displayName).tag(display)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                // Mouse DPI
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Mouse DPI")
+                        .font(.headline)
+                    Text("For accurate distance calculation (default: 96)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    HStack {
+                        TextField("DPI", value: $appSettings.dpi, formatter: NumberFormatter())
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 100)
+                    }
+                }
+
+                // Distance Format
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Distance Format")
+                        .font(.headline)
+                    Text("How to display mouse distance in history")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Picker("Distance Format", selection: $appSettings.distanceFormat) {
+                        ForEach(DistanceFormat.allCases, id: \.self) { format in
+                            Text(format.displayName).tag(format)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
+            .padding(.vertical, 10)
+
+            Spacer()
+
+            Text("Changes apply automatically")
+                .foregroundColor(.secondary)
+                .font(.caption)
+        }
+        .padding(20)
+        .frame(width: 450, height: 350)
+    }
+}
+
+final class SettingsWindowController {
+    private var window: NSWindow?
+    private var hostingController: NSHostingController<SettingsView>?
+    private var closeObserver: NSObjectProtocol?
+
+    deinit {
+        if let observer = closeObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    func show(appSettings: AppSettings) {
+        if let existingWindow = window {
+            existingWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let settingsView = SettingsView(appSettings: appSettings)
+        let hosting = NSHostingController(rootView: settingsView)
+        hostingController = hosting
+
+        let newWindow = NSWindow(contentViewController: hosting)
+        newWindow.title = "Settings"
+        newWindow.styleMask = [.titled, .closable]
+        newWindow.setContentSize(NSSize(width: 450, height: 350))
+
+        if let screen = NSScreen.main {
+            let screenFrame = screen.visibleFrame
+            let windowFrame = newWindow.frame
+            let x = (screenFrame.width - windowFrame.width) / 2 + screenFrame.origin.x
+            let y = (screenFrame.height - windowFrame.height) / 2 + screenFrame.origin.y
+            newWindow.setFrameOrigin(NSPoint(x: x, y: y))
+        }
+
+        newWindow.isReleasedWhenClosed = false
+
+        if let observer = closeObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+
+        closeObserver = NotificationCenter.default.addObserver(
+            forName: NSWindow.willCloseNotification,
+            object: newWindow,
+            queue: .main
+        ) { [weak self] _ in
+            self?.window = nil
+            self?.hostingController = nil
+        }
+
+        window = newWindow
+        newWindow.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func close() {
+        if let observer = closeObserver {
+            NotificationCenter.default.removeObserver(observer)
+            closeObserver = nil
+        }
+        window?.close()
+        window = nil
+        hostingController = nil
+    }
+}

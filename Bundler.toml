@@ -1,0 +1,10 @@
+[apps.InputStats]
+product = "InputStats"
+identifier = "com.inputstats.app"
+version = "1.0.0"
+category = "public.app-category.productivity"
+minimum-macos-version = "13.0"
+
+[apps.InputStats.info-plist-entries]
+LSUIElement = true
+NSAccessibilityUsageDescription = "InputStats needs Accessibility access to track keystrokes, mouse clicks, scrolls, and distance across all applications."

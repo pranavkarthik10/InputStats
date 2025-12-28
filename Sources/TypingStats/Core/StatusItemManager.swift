@@ -11,7 +11,10 @@ final class StatusItemManager: ObservableObject {
     private var clickHandler: (() -> Void)?
 
     @Published var keystrokeCount: Int = 0
-    @Published var displayText: String? = nil
+    @Published var wordCount: Int = 0
+    @Published var clickCount: Int = 0
+    @Published var distanceText: String? = nil
+    @Published var displayMode: String = "keystrokes"
 
     func createStatusItem(onClick: @escaping () -> Void) {
         self.clickHandler = onClick
@@ -22,8 +25,11 @@ final class StatusItemManager: ObservableObject {
         // Create SwiftUI view wrapped in NSHostingView
         let rootView = StatusItemView(
             sizePassthrough: sizePassthrough,
-            count: keystrokeCount,
-            displayText: displayText
+            keystrokeCount: keystrokeCount,
+            wordCount: wordCount,
+            clickCount: clickCount,
+            distanceText: distanceText,
+            displayMode: displayMode
         )
         let hostingView = NSHostingView(rootView: rootView)
 
@@ -56,25 +62,37 @@ final class StatusItemManager: ObservableObject {
 
     func updateCount(_ count: Int) {
         keystrokeCount = count
-        displayText = nil
-
-        // Update SwiftUI view
-        let rootView = StatusItemView(
-            sizePassthrough: sizePassthrough,
-            count: count,
-            displayText: nil
-        )
-        hostingView?.rootView = rootView
+        updateStatusView()
     }
 
-    func updateText(_ text: String) {
-        displayText = text
+    func updateWordCount(_ count: Int) {
+        wordCount = count
+        updateStatusView()
+    }
 
-        // Update SwiftUI view
+    func updateClickCount(_ count: Int) {
+        clickCount = count
+        updateStatusView()
+    }
+
+    func updateDistanceText(_ text: String?) {
+        distanceText = text
+        updateStatusView()
+    }
+
+    func updateDisplayMode(_ mode: String) {
+        displayMode = mode
+        updateStatusView()
+    }
+
+    private func updateStatusView() {
         let rootView = StatusItemView(
             sizePassthrough: sizePassthrough,
-            count: keystrokeCount,
-            displayText: text
+            keystrokeCount: keystrokeCount,
+            wordCount: wordCount,
+            clickCount: clickCount,
+            distanceText: distanceText,
+            displayMode: displayMode
         )
         hostingView?.rootView = rootView
     }
@@ -96,31 +114,70 @@ private struct SizePreferenceKey: PreferenceKey {
 // MARK: - Status Item SwiftUI View
 struct StatusItemView: View {
     var sizePassthrough: PassthroughSubject<CGSize, Never>
-    var count: Int
-    var displayText: String?
+    var keystrokeCount: Int
+    var wordCount: Int
+    var clickCount: Int
+    var distanceText: String?
+    var displayMode: String
 
-    private var formattedCount: String {
-        if count >= 1000 {
+    private func formatCount(_ count: Int) -> String {
+        if count >= 1000000 {
+            let m = Double(count) / 1000000.0
+            return String(format: "%.1fM", m)
+        } else if count >= 1000 {
             let k = Double(count) / 1000.0
             return String(format: "%.1fk", k)
         }
         return "\(count)"
     }
 
-    private var displayValue: String {
-        displayText ?? formattedCount
+    private var displayText: String {
+        switch displayMode {
+        case "all":
+            var parts: [String] = []
+            if keystrokeCount > 0 {
+                parts.append(formatCount(keystrokeCount))
+            }
+            if clickCount > 0 {
+                parts.append(formatCount(clickCount))
+            }
+            if let distance = distanceText {
+                parts.append(distance)
+            }
+            return parts.joined(separator: " / ")
+        case "keystrokes":
+            return formatCount(keystrokeCount)
+        case "words":
+            return formatCount(wordCount)
+        case "clicks":
+            return formatCount(clickCount)
+        case "distance":
+            return distanceText ?? "0 mi"
+        default:
+            return formatCount(keystrokeCount)
+        }
     }
 
     private var iconName: String {
-        displayText != nil ? "mouse" : "keyboard"
+        switch displayMode {
+        case "distance":
+            return "arrow.up.left.and.down.right.and.arrow.up.right.and.down.left"
+        case "clicks":
+            return "cursorarrow.click"
+        case "words", "all":
+            return "text.alignleft"
+        default:
+            return "keyboard"
+        }
     }
 
     var body: some View {
         HStack(spacing: 5) {
             Image(systemName: iconName)
                 .font(.system(size: 14))
-            Text(displayValue)
+            Text(displayText)
                 .font(.system(size: 13, weight: .medium).monospacedDigit())
+                .lineLimit(1)
         }
         .foregroundColor(.primary)
         .fixedSize()

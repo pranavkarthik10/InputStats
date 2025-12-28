@@ -80,6 +80,7 @@ enum StatusDisplay: String, CaseIterable {
     case words = "words"
     case clicks = "clicks"
     case distance = "distance"
+    case all = "all"
 
     var displayName: String {
         switch self {
@@ -87,6 +88,7 @@ enum StatusDisplay: String, CaseIterable {
         case .words: return "Words"
         case .clicks: return "Clicks"
         case .distance: return "Distance"
+        case .all: return "All"
         }
     }
 }

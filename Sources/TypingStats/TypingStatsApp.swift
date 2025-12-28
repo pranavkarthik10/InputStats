@@ -66,22 +66,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func updateStatusItem() {
-        let display = appSettings.statusDisplay
-        switch display {
-        case .keystrokes:
-            let count = Int(repository.todayStats?.totalKeystrokes ?? 0)
-            statusItemManager.updateCount(count)
-        case .words:
-            let count = Int(repository.todayStats?.totalWords ?? 0)
-            statusItemManager.updateCount(count)
-        case .clicks:
-            let count = Int(repository.todayStats?.totalMouseClicks ?? 0)
-            statusItemManager.updateCount(count)
-        case .distance:
-            let pixels = repository.todayStats?.totalMouseDistance ?? 0
-            let formattedDistance = appSettings.formatDistance(pixels)
-            statusItemManager.updateText(formattedDistance)
-        }
+        let todayStats = repository.todayStats
+
+        statusItemManager.updateCount(Int(todayStats?.totalKeystrokes ?? 0))
+        statusItemManager.updateWordCount(Int(todayStats?.totalWords ?? 0))
+        statusItemManager.updateClickCount(Int(todayStats?.totalMouseClicks ?? 0))
+
+        let pixels = todayStats?.totalMouseDistance ?? 0
+        statusItemManager.updateDistanceText(appSettings.formatDistance(pixels))
+
+        statusItemManager.updateDisplayMode(appSettings.statusDisplay.rawValue)
     }
 
     private func showMenu() {

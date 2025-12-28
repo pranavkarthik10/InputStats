@@ -8,7 +8,8 @@ struct SettingsView: View {
             Text("Settings")
                 .font(.title)
                 .fontWeight(.bold)
-                .padding(.bottom, 10)
+                .padding(.top, 5)
+                .padding(.bottom, 15)
 
             VStack(alignment: .leading, spacing: 20) {
                 // Status Bar Display

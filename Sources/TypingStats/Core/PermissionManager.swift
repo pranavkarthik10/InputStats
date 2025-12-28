@@ -14,7 +14,8 @@ final class PermissionManager: ObservableObject {
 
     /// Check current authorization status without prompting
     func checkAuthorization() {
-        isAuthorized = AXIsProcessTrusted()
+        let trusted = AXIsProcessTrusted()
+        isAuthorized = trusted
     }
 
     /// Request authorization - shows system prompt and opens System Preferences
@@ -29,9 +30,14 @@ final class PermissionManager: ObservableObject {
         }
     }
 
+    /// Force recheck authorization status
+    func forceCheck() {
+        checkAuthorization()
+    }
+
     /// Start polling for permission changes (macOS doesn't provide callbacks)
     private func startPolling() {
-        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             DispatchQueue.main.async {
                 self?.checkAuthorization()
             }

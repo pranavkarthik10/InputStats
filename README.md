@@ -35,7 +35,7 @@ Requirements:
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/InputStats.git
+git clone https://github.com/pranavkarthik10/InputStats.git
 cd InputStats
 
 # Build release version
@@ -45,73 +45,3 @@ swift build -c release
 cp .build/release/InputStats InputStats.app/Contents/MacOS/
 open InputStats.app
 ```
-
-## How It Works
-
-### Keystroke & Mouse Monitoring
-
-Uses `CGEventTap` to listen for keyboard and mouse events system-wide. This requires **Accessibility permission** which you'll be prompted to grant on first launch.
-
-### Word Counting
-
-Counts words by detecting when you start typing a new word (transition from space/enter to a letter). Accurate for normal typing.
-
-### Mouse Distance
-
-Calculates mouse travel distance by tracking pixel movement between events. DPI setting allows accurate conversion to real-world units.
-
-### CRDT Sync
-
-Each device maintains a G-Counter (Grow-only Counter) for each metric. When syncing via iCloud:
-
-```
-Device A: {A: 100, B: 50}
-Device B: {A: 80, B: 70}
-Merged:   {A: 100, B: 70}  // max() of each device's count
-```
-
-This ensures counts always converge correctly regardless of sync order or timing - no conflicts possible!
-
-### Data Storage
-
-- **Local**: `~/Library/Application Support/TypingStats/`
-- **iCloud**: `NSUbiquitousKeyValueStore` (automatic, up to 1MB)
-
-## Project Structure
-
-```
-Sources/TypingStats/
-├── TypingStatsApp.swift      # App entry point & menu
-├── Core/
-│   ├── KeystrokeMonitor.swift    # CGEventTap wrapper for keyboard
-│   ├── MouseMonitor.swift        # CGEventTap wrapper for mouse
-│   ├── PermissionManager.swift   # Accessibility permissions
-│   └── StatusItemManager.swift   # Menubar icon + count
-├── Data/
-│   ├── AppSettings.swift         # User preferences
-│   ├── GCounter.swift            # CRDT implementation
-│   ├── DailyStats.swift          # Daily record model
-│   ├── DeviceID.swift            # Hardware UUID
-│   ├── LocalStore.swift          # JSON persistence
-│   ├── iCloudSync.swift          # iCloud key-value store
-│   └── StatsRepository.swift     # Data coordinator
-└── UI/
-    ├── HistoryWindow.swift       # History view
-    └── SettingsWindow.swift     # Settings view
-```
-
-## Privacy
-
-InputStats:
-- Only counts input events, never records what you type or click
-- Stores data locally and in your personal iCloud
-- Has no analytics, telemetry, or network calls (except iCloud sync)
-- Is fully open source for you to audit
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## Acknowledgments
-
-- [Multi.app](https://multi.app/blog/pushing-the-limits-nsstatusitem) for NSStatusItem + NSHostingView technique

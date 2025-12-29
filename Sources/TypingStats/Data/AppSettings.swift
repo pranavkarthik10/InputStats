@@ -5,21 +5,28 @@ import Combine
 final class AppSettings: ObservableObject {
     @Published var dpi: Double
     @Published var distanceFormat: DistanceFormat
-    @Published var statusDisplay: StatusDisplay
+    @Published var selectedMetrics: Set<Metric>
 
     private let userDefaults = UserDefaults.standard
 
     private enum Keys {
         static let dpi = "dpiSetting"
         static let distanceFormat = "distanceFormat"
-        static let statusDisplay = "statusDisplay"
+        static let selectedMetrics = "selectedMetrics"
     }
 
     init() {
         let dpiValue = userDefaults.double(forKey: Keys.dpi)
         self.dpi = dpiValue == 0 ? 96.0 : dpiValue
         self.distanceFormat = DistanceFormat(rawValue: userDefaults.string(forKey: Keys.distanceFormat) ?? "mi") ?? .miles
-        self.statusDisplay = StatusDisplay(rawValue: userDefaults.string(forKey: Keys.statusDisplay) ?? "keystrokes") ?? .keystrokes
+
+        // Load saved metrics, default to keystrokes if none
+        if let savedMetrics = userDefaults.string(forKey: Keys.selectedMetrics) {
+            let metricStrings = savedMetrics.split(separator: ",").map { String($0) }
+            self.selectedMetrics = Set(metricStrings.compactMap { Metric(rawValue: $0.trimmingCharacters(in: .whitespaces)) })
+        } else {
+            self.selectedMetrics = [.keystrokes]
+        }
     }
 
     func saveDPI(_ value: Double) {
@@ -33,10 +40,22 @@ final class AppSettings: ObservableObject {
         self.distanceFormat = format
     }
 
-    func saveStatusDisplay(_ display: StatusDisplay) {
-        userDefaults.set(display.rawValue, forKey: Keys.statusDisplay)
-        self.statusDisplay = display
+    func saveSelectedMetrics(_ metrics: Set<Metric>) {
+        let metricStrings = metrics.map { $0.rawValue }.joined(separator: ",")
+        userDefaults.set(metricStrings, forKey: Keys.selectedMetrics)
+        self.selectedMetrics = metrics
     }
+
+    func toggleMetric(_ metric: Metric) {
+        var newMetrics = selectedMetrics
+        if newMetrics.contains(metric) {
+            newMetrics.remove(metric)
+        } else {
+            newMetrics.insert(metric)
+        }
+        saveSelectedMetrics(newMetrics)
+    }
+
 
     func formatDistance(_ pixels: Double) -> String {
         let miles = pixelsToMiles(pixels)
@@ -75,12 +94,11 @@ final class AppSettings: ObservableObject {
     }
 }
 
-enum StatusDisplay: String, CaseIterable {
+enum Metric: String, CaseIterable, Hashable {
     case keystrokes = "keystrokes"
     case words = "words"
     case clicks = "clicks"
     case distance = "distance"
-    case all = "all"
 
     var displayName: String {
         switch self {
@@ -88,7 +106,15 @@ enum StatusDisplay: String, CaseIterable {
         case .words: return "Words"
         case .clicks: return "Clicks"
         case .distance: return "Distance"
-        case .all: return "All"
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .keystrokes: return "keyboard"
+        case .words: return "text.alignleft"
+        case .clicks: return "cursorarrow.click"
+        case .distance: return "arrow.up.left.and.down.right.and.arrow.up.right.and.down.left"
         }
     }
 }

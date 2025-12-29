@@ -15,7 +15,7 @@ enum TimeRange: String, CaseIterable {
     }
 }
 
-enum Metric: String, CaseIterable {
+enum HistoryMetric: String, CaseIterable {
     case keystrokes = "Keystrokes"
     case words = "Words"
     case clicks = "Clicks"
@@ -34,7 +34,7 @@ struct HistoryView: View {
         return allStats.filter { $0.id >= cutoffID }.sorted { $0.id < $1.id }
     }
 
-    private func getCount(for stats: DailyStats?, metric: Metric) -> UInt64 {
+    private func getCount(for stats: DailyStats?, metric: HistoryMetric) -> UInt64 {
         guard let stats = stats else { return 0 }
         switch metric {
         case .keystrokes: return stats.totalKeystrokes
@@ -50,7 +50,7 @@ struct HistoryView: View {
         return stats.totalMouseDistance
     }
 
-    private func chartData(for metric: Metric) -> [ChartDataPoint] {
+    private func chartData(for metric: HistoryMetric) -> [ChartDataPoint] {
         var points: [ChartDataPoint] = []
         for i in (0..<selectedRange.days).reversed() {
             let dateID = DateHelpers.dateID(daysAgo: i)
@@ -63,7 +63,7 @@ struct HistoryView: View {
     }
 
     private var maxCount: UInt64 {
-        let allCounts = Metric.allCases.flatMap { metric in
+        let allCounts = HistoryMetric.allCases.flatMap { metric in
             chartData(for: metric).map(\.count)
         }
         return max(allCounts.max() ?? 0, 100)
@@ -93,7 +93,7 @@ struct HistoryView: View {
                 .padding(.bottom, 16)
 
                 // Charts for each metric
-                ForEach(Metric.allCases, id: \.self) { metric in
+                ForEach(HistoryMetric.allCases, id: \.self) { metric in
                     VStack(alignment: .leading) {
                         Text(metric.rawValue)
                             .font(.headline)
@@ -195,7 +195,7 @@ struct HistoryView: View {
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
 
-    private func formatAxisValue(_ value: Double, metric: Metric) -> String {
+    private func formatAxisValue(_ value: Double, metric: HistoryMetric) -> String {
         switch metric {
         case .distance:
             let pixels = value

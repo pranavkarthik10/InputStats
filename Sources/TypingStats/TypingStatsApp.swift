@@ -43,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             .store(in: &cancellables)
 
-        appSettings.$statusDisplay
+        appSettings.$selectedMetrics
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateStatusItem()
@@ -75,7 +75,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let pixels = todayStats?.totalMouseDistance ?? 0
         statusItemManager.updateDistanceText(appSettings.formatDistance(pixels))
 
-        statusItemManager.updateDisplayMode(appSettings.statusDisplay.rawValue)
+        statusItemManager.updateSelectedMetrics(appSettings.selectedMetrics)
     }
 
     private func showMenu() {

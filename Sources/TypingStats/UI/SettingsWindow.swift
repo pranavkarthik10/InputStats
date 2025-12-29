@@ -5,26 +5,28 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Settings")
-                .font(.title)
-                .fontWeight(.bold)
-                .padding(.top, 5)
-                .padding(.bottom, 15)
-
             VStack(alignment: .leading, spacing: 20) {
                 // Status Bar Display
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Menu Bar Display")
                         .font(.headline)
-                    Text("What to show in the menu bar icon")
+                    Text("What to show in menu bar icon")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Picker("Display", selection: $appSettings.statusDisplay) {
-                        ForEach(StatusDisplay.allCases, id: \.self) { display in
-                            Text(display.displayName).tag(display)
+                    ForEach(Metric.allCases, id: \.self) { metric in
+                        Button(action: {
+                            appSettings.toggleMetric(metric)
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: appSettings.selectedMetrics.contains(metric) ? "checkmark.square.fill" : "square")
+                                    .frame(width: 16)
+                                Image(systemName: metric.iconName)
+                                    .frame(width: 16)
+                                Text(metric.displayName)
+                            }
                         }
+                        .buttonStyle(.plain)
                     }
-                    .pickerStyle(.segmented)
                 }
 
                 // Mouse DPI
@@ -92,7 +94,7 @@ final class SettingsWindowController {
         hostingController = hosting
 
         let newWindow = NSWindow(contentViewController: hosting)
-        newWindow.title = "Settings"
+        newWindow.title = ""
         newWindow.styleMask = [.titled, .closable]
         newWindow.setContentSize(NSSize(width: 450, height: 350))
 

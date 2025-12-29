@@ -21,7 +21,7 @@ struct DeviceIdentifier {
         }
 
         // Fallback to UserDefaults UUID if hardware UUID unavailable
-        let key = "typingstats_device_uuid"
+        let key = "inputstats_device_uuid"
         if let stored = UserDefaults.standard.string(forKey: key) {
             return stored
         }

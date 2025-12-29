@@ -19,7 +19,7 @@ final class StatusItemManager: ObservableObject {
     func createStatusItem(onClick: @escaping () -> Void) {
         self.clickHandler = onClick
 
-        // Create status item
+        // Create status item with variable length
         let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         // Create SwiftUI view wrapped in NSHostingView
@@ -33,12 +33,22 @@ final class StatusItemManager: ObservableObject {
         )
         let hostingView = NSHostingView(rootView: rootView)
 
-        // Initial frame - will be updated dynamically
-        hostingView.frame = NSRect(x: 0, y: 0, width: 60, height: 22)
-
         if let button = statusItem.button {
-            button.frame = hostingView.frame
+            // Clear button title and image
+            button.title = ""
+            button.image = nil
+
+            // Add hosting view as subview
             button.addSubview(hostingView)
+
+            // Use Auto Layout constraints
+            hostingView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                hostingView.leadingAnchor.constraint(equalTo: button.leadingAnchor),
+                hostingView.trailingAnchor.constraint(equalTo: button.trailingAnchor),
+                hostingView.topAnchor.constraint(equalTo: button.topAnchor),
+                hostingView.bottomAnchor.constraint(equalTo: button.bottomAnchor)
+            ])
 
             // Set up click action
             button.target = self
@@ -48,11 +58,9 @@ final class StatusItemManager: ObservableObject {
         self.statusItem = statusItem
         self.hostingView = hostingView
 
-        // Listen for size changes from the SwiftUI view
+        // Listen for size changes from the SwiftUI view and update status item length
         sizeCancellable = sizePassthrough.sink { [weak self] size in
-            let frame = NSRect(origin: .zero, size: CGSize(width: size.width + 8, height: 22))
-            self?.hostingView?.frame = frame
-            self?.statusItem?.button?.frame = frame
+            self?.statusItem?.length = size.width + 12
         }
     }
 

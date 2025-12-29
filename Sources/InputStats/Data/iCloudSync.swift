@@ -6,7 +6,7 @@ final class iCloudSync {
     private let store = NSUbiquitousKeyValueStore.default
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    private let logger = Logger(subsystem: "TypingStats", category: "iCloudSync")
+    private let logger = Logger(subsystem: "InputStats", category: "iCloudSync")
 
     private let keyPrefix = "stats_"
     private var changeObserver: NSObjectProtocol?

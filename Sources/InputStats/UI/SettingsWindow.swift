@@ -5,60 +5,56 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            VStack(alignment: .leading, spacing: 20) {
-                // Status Bar Display
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Menu Bar Display")
-                        .font(.headline)
-                    Text("What to show in menu bar icon")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    ForEach(Metric.allCases, id: \.self) { metric in
-                        Button(action: {
-                            appSettings.toggleMetric(metric)
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: appSettings.selectedMetrics.contains(metric) ? "checkmark.square.fill" : "square")
-                                    .frame(width: 16)
-                                Image(systemName: metric.iconName)
-                                    .frame(width: 16)
-                                Text(metric.displayName)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-
-                // Mouse DPI
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Mouse DPI")
-                        .font(.headline)
-                    Text("For accurate distance calculation (default: 96)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    HStack {
-                        TextField("DPI", value: $appSettings.dpi, formatter: NumberFormatter())
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 100)
-                    }
-                }
-
-                // Distance Format
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Distance Format")
-                        .font(.headline)
-                    Text("How to display mouse distance in history")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Picker("Distance Format", selection: $appSettings.distanceFormat) {
-                        ForEach(DistanceFormat.allCases, id: \.self) { format in
-                            Text(format.displayName).tag(format)
+            // Menu Bar Display
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Menu Bar Display")
+                    .font(.headline)
+                Text("What to show in menu bar icon")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                ForEach(Metric.allCases, id: \.self) { metric in
+                    Button(action: {
+                        appSettings.toggleMetric(metric)
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: appSettings.selectedMetrics.contains(metric) ? "checkmark.square.fill" : "square")
+                                .frame(width: 16)
+                            Image(systemName: metric.iconName)
+                                .frame(width: 16)
+                            Text(metric.displayName)
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .buttonStyle(.plain)
                 }
             }
-            .padding(.vertical, 10)
+
+            // Mouse DPI
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Mouse DPI")
+                    .font(.headline)
+                Text("For accurate distance calculation (default: 96)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                TextField("DPI", value: $appSettings.dpi, formatter: NumberFormatter())
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 100)
+            }
+
+            // Distance Format
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Distance Format")
+                    .font(.headline)
+                Text("How to display mouse distance in history")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Picker("Distance Format", selection: $appSettings.distanceFormat) {
+                    ForEach(DistanceFormat.allCases, id: \.self) { format in
+                        Text(format.displayName).tag(format)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 200)
+            }
 
             Spacer()
 
@@ -67,7 +63,7 @@ struct SettingsView: View {
                 .font(.caption)
         }
         .padding(20)
-        .frame(width: 450, height: 350)
+        .frame(width: 320, height: 380, alignment: .topLeading)
     }
 }
 
@@ -94,9 +90,9 @@ final class SettingsWindowController {
         hostingController = hosting
 
         let newWindow = NSWindow(contentViewController: hosting)
-        newWindow.title = ""
+        newWindow.title = "Settings"
         newWindow.styleMask = [.titled, .closable]
-        newWindow.setContentSize(NSSize(width: 450, height: 350))
+        newWindow.setContentSize(NSSize(width: 320, height: 380))
 
         if let screen = NSScreen.main {
             let screenFrame = screen.visibleFrame

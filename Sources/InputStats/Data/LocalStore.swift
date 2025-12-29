@@ -6,15 +6,15 @@ final class LocalStore {
     private let fileManager = FileManager.default
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    private let logger = Logger(subsystem: "TypingStats", category: "LocalStore")
+    private let logger = Logger(subsystem: "InputStats", category: "LocalStore")
 
-    /// Application Support directory for TypingStats
+    /// Application Support directory for InputStats
     private lazy var storeDirectory: URL? = {
         guard let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
             logger.error("Failed to locate Application Support directory")
             return nil
         }
-        let dir = appSupport.appendingPathComponent("TypingStats", isDirectory: true)
+        let dir = appSupport.appendingPathComponent("InputStats", isDirectory: true)
         do {
             try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
             return dir

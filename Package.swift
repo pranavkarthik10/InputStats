@@ -9,7 +9,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "InputStats",
-            path: "Sources/TypingStats"
+            path: "Sources/InputStats"
         )
     ]
 )

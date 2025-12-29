@@ -3,7 +3,7 @@ import Combine
 import ServiceManagement
 
 @main
-struct TypingStatsApp: App {
+struct InputStatsApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
